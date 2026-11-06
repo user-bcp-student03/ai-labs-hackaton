@@ -1,0 +1,55 @@
+<h1 class="page__title">{{ copy.pageTitle }}</h1>
+
+@if (store.flow(); as flow) {
+  <app-flow-approval-notice [approvalStatus]="flow.approval_status" [label]="flow.label" />
+}
+
+@switch (store.screen()) {
+  @case ('loading') {
+    <p class="page__status" aria-busy="true">{{ copy.loading }}</p>
+  }
+  @case ('load-error') {
+    <section class="page__status">
+      <p>{{ copy.loadError }}</p>
+      <button type="button" (click)="store.load()">{{ copy.retryLoad }}</button>
+    </section>
+  }
+  @case ('not-configured') {
+    <p class="page__status">{{ copy.notConfigured }}</p>
+  }
+  @case ('completed') {
+    <app-onboarding-done />
+  }
+  @case ('in-progress') {
+    @if (store.onboarding(); as onboarding) {
+      <app-step-indicator [steps]="onboarding.steps" />
+      @if (store.currentStep(); as step) {
+        <section aria-labelledby="step-heading">
+          <h2 #stepHeading id="step-heading" tabindex="-1" class="page__step-title">{{ step.title }}</h2>
+          @if (step.description) {
+            <p>{{ step.description }}</p>
+          }
+          <app-step-form
+            [step]="step"
+            [fieldErrors]="store.fieldErrors()"
+            [submitError]="store.submitError()"
+            [submitting]="store.submitting()"
+            [isLastStep]="store.isLastStep()"
+            (stepSubmitted)="store.submitCurrentStep($event)"
+          />
+        </section>
+      } @else {
+        <section aria-labelledby="close-heading">
+          <h2 id="close-heading" class="page__step-title">{{ copy.allStepsDone }}</h2>
+          <p>{{ copy.stepsDoneNeedClose }}</p>
+          @if (closeErrorItems().length > 0) {
+            <app-error-summary [heading]="copy.saveErrorHeading" [items]="closeErrorItems()" />
+          }
+          <button type="button" [disabled]="store.submitting()" (click)="store.retryClose()">
+            {{ store.submitting() ? copy.saving : copy.retryClose }}
+          </button>
+        </section>
+      }
+    }
+  }
+}
