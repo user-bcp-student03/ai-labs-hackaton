@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "github-local": {
+      "type": "http",
+      "url": "http://localhost:8081/mcp"
+    },
+    "wallet-mocks":  { "type": "http", "url": "http://localhost:8082/mcp" }
+  }
+}
