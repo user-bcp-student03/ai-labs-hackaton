@@ -1,0 +1,61 @@
+.status,
+.error {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.status--pending {
+  border-color: var(--color-notice-border);
+  background: var(--color-notice-bg);
+}
+
+.error {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.reference {
+  margin: 1rem 0;
+}
+
+.reference dt {
+  color: var(--color-muted);
+}
+
+.reference dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.spinner {
+  display: inline-block;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: 3px solid var(--color-border);
+  border-block-start-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.next-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block-start: 1.5rem;
+}
+
+.secondary {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}

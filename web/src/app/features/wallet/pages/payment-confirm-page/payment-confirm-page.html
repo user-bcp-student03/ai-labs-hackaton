@@ -1,0 +1,32 @@
+@if (blocked(); as block) {
+  <h1 #heading tabindex="-1">{{ copy.blockedHeading }}</h1>
+  <p class="blocked" role="alert">{{ block.message }}</p>
+  @if (summary(); as summary) {
+    <dl class="summary">
+      <dt>{{ copy.confirmRecipient }}</dt>
+      <dd>{{ summary.recipient }}</dd>
+      <dt>{{ copy.confirmAmount }}</dt>
+      <dd>{{ summary.amount }}</dd>
+    </dl>
+  }
+  <app-payment-actions [actions]="block.actions" />
+} @else {
+  <h1 #heading tabindex="-1">{{ copy.confirmHeading }}</h1>
+  @if (summary(); as summary) {
+    <dl class="summary">
+      <dt>{{ copy.confirmRecipient }}</dt>
+      <dd>{{ summary.recipient }}</dd>
+      <dt>{{ copy.confirmAmount }}</dt>
+      <dd>{{ summary.amount }}</dd>
+    </dl>
+  }
+  @if (submitError(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+  <div class="actions">
+    <button type="button" [disabled]="submitting()" [attr.aria-busy]="submitting()" (click)="confirm()">
+      {{ submitting() ? copy.confirming : copy.confirmButton }}
+    </button>
+    <button type="button" class="secondary" [disabled]="submitting()" (click)="back()">{{ copy.backButton }}</button>
+  </div>
+}

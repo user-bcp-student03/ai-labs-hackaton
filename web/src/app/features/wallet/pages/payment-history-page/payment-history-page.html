@@ -1,0 +1,30 @@
+<h1 #heading tabindex="-1">{{ copy.historyHeading }}</h1>
+
+@if (loading()) {
+  <p role="status">{{ copy.historyLoading }}</p>
+} @else if (failed()) {
+  <p class="error" role="alert">{{ copy.historyLoadFailed }}</p>
+  <button type="button" (click)="load()">{{ copy.historyRetry }}</button>
+} @else if (items().length === 0) {
+  <p>{{ copy.historyEmpty }}</p>
+} @else {
+  <ul class="list">
+    @for (entry of items(); track entry.item.payment_id) {
+      <li class="item">
+        <p class="item__main">
+          <strong>{{ formatCents(entry.item.amount_cents) }}</strong> · {{ recipientLabel(entry.item.recipient) }}
+        </p>
+        <p class="item__status">{{ entry.item.status_label }}</p>
+        @if (entry.attempts > 1) {
+          <p class="item__attempts">{{ copy.attemptsCount(entry.attempts) }}</p>
+        }
+        @if (entry.item.transaction_reference; as reference) {
+          <p class="item__reference">{{ copy.referenceLabel }}: {{ reference }}</p>
+        }
+        <a [routerLink]="resultRoute(entry.item.payment_id)">{{ copy.historyDetail }}</a>
+      </li>
+    }
+  </ul>
+}
+
+<p><a class="button" [routerLink]="paymentsRoute">{{ copy.historyNewPayment }}</a></p>

@@ -1,2 +1,53 @@
 <h1>{{ copy.heading }}</h1>
-<p>{{ copy.placeholder }}</p>
+<p>{{ copy.intro }}</p>
+
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="field" [class.field--invalid]="recipientError()">
+    <label for="recipient">{{ copy.recipientLabel }}</label>
+    <select
+      #recipientInput
+      id="recipient"
+      formControlName="recipient"
+      aria-required="true"
+      [attr.aria-invalid]="recipientError() ? 'true' : null"
+      [attr.aria-describedby]="recipientError() ? 'recipient-error' : null"
+    >
+      <option value="">{{ copy.recipientPlaceholder }}</option>
+      @for (option of recipients; track option.id) {
+        <option [value]="option.id">{{ option.label }}</option>
+      }
+    </select>
+    @if (recipientError(); as message) {
+      <p class="field__error" id="recipient-error"><span>{{ copy.errorPrefix }}</span> {{ message }}</p>
+    }
+  </div>
+
+  <div class="field" [class.field--invalid]="amountError()">
+    <label for="amount">{{ copy.amountLabel }}</label>
+    <p class="field__hint" id="amount-hint">{{ copy.amountHint }}</p>
+    <input
+      #amountInput
+      id="amount"
+      type="text"
+      inputmode="decimal"
+      autocomplete="off"
+      formControlName="amount"
+      aria-required="true"
+      [attr.aria-invalid]="amountError() ? 'true' : null"
+      [attr.aria-describedby]="amountError() ? 'amount-hint amount-error' : 'amount-hint'"
+    />
+    @if (amountError(); as message) {
+      <p class="field__error" id="amount-error"><span>{{ copy.errorPrefix }}</span> {{ message }}</p>
+    }
+  </div>
+
+  @if (serviceError(); as message) {
+    <p class="field__error" role="alert">{{ message }}</p>
+  }
+
+  <button type="submit" [disabled]="busy()" [attr.aria-busy]="busy()">
+    {{ busy() ? copy.continuing : copy.continue }}
+  </button>
+</form>
+
+<p><a [routerLink]="historyRoute">{{ copy.history }}</a></p>
