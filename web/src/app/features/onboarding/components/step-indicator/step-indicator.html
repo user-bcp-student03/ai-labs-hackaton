@@ -1,0 +1,17 @@
+<nav [attr.aria-label]="copy.progressLabel">
+  <p class="indicator__summary">{{ summary() }}</p>
+  <ol class="indicator__list">
+    @for (step of steps(); track step.id) {
+      <li
+        class="indicator__item"
+        [class.indicator__item--current]="step.status === 'current'"
+        [class.indicator__item--completed]="step.status === 'completed'"
+        [attr.aria-current]="step.status === 'current' ? 'step' : null"
+      >
+        <span class="indicator__marker" aria-hidden="true">{{ step.status === 'completed' ? '✓' : step.order }}</span>
+        <span class="indicator__title">{{ step.title }}</span>
+        <span class="indicator__status">({{ copy.stepStatus[step.status] }})</span>
+      </li>
+    }
+  </ol>
+</nav>

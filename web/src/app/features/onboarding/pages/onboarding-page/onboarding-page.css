@@ -1,0 +1,13 @@
+.page__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+.page__step-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.page__status {
+  margin-block: 1rem;
+}

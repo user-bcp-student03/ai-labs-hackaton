@@ -1,6 +1,6 @@
 # Tasks
 
-> El repositorio es greenfield (sin código de aplicación): estas tareas describen trabajo futuro y no referencian archivos existentes. No implementar en este cambio.
+> Las secciones 2 a 7 están implementadas en `api/` (pruebas completas en verde). La sección 1 contiene acuerdos con otras áreas que siguen pendientes (1.4, 1.5, 1.6).
 
 ## 1. Definiciones pendientes (no resueltas aquí)
 

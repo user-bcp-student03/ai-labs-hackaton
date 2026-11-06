@@ -1,0 +1,37 @@
+<div class="field" [class.field--invalid]="error()">
+  @if (field().type === 'checkbox') {
+    <div class="field__checkbox">
+      <input
+        type="checkbox"
+        [id]="inputId()"
+        [formControl]="control()"
+        [attr.aria-required]="field().required"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
+      />
+      <label [for]="inputId()">{{ labelText() }}</label>
+    </div>
+    @if (field().hint; as hint) {
+      <p class="field__hint" [id]="hintId()">{{ hint }}</p>
+    }
+  } @else {
+    <label [for]="inputId()">{{ labelText() }}</label>
+    @if (field().hint; as hint) {
+      <p class="field__hint" [id]="hintId()">{{ hint }}</p>
+    }
+    <input
+      type="text"
+      [id]="inputId()"
+      [formControl]="control()"
+      [attr.aria-required]="field().required"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.autocomplete]="field().autocomplete"
+      [attr.inputmode]="field().input_mode"
+      [attr.maxlength]="field().max_length"
+    />
+  }
+  @if (error(); as message) {
+    <p class="field__error" [id]="errorId()"><span class="field__error-prefix">{{ copy.errorPrefix }}</span> {{ message }}</p>
+  }
+</div>

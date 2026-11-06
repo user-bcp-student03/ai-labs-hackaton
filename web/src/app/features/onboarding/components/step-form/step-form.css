@@ -1,0 +1,10 @@
+.step-form__submit {
+  inline-size: 100%;
+}
+
+@media (min-width: 40rem) {
+  .step-form__submit {
+    inline-size: auto;
+    min-inline-size: 12rem;
+  }
+}

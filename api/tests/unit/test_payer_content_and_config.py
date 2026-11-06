@@ -32,7 +32,7 @@ def test_configuracion_por_defecto_sin_limites_de_monto():
     settings = Settings()
     assert settings.amount_limits_cents_by_channel == {}
     assert settings.attempt_timeout_seconds == 120
-    assert settings.cohort == "MVP_PE"
+    assert settings.cohort == "MVP-PE"
 
 
 def test_configuracion_desde_variables_de_entorno():

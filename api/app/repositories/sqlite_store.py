@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from collections.abc import Callable
+from contextlib import AbstractContextManager
 from datetime import datetime, timezone
 
 from app.ports.event_store import AnalyticsEvent, Discrepancy
@@ -17,10 +17,9 @@ from app.ports.idempotency_store import (
     RequestRecord,
     ReserveOutcome,
 )
+from app.repositories.sqlite_support import connection, initialize_schema, to_datetime, to_text
 
-BUSY_TIMEOUT_SECONDS = 10.0
 MAX_LISTED_ROWS = 500
-TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f+00:00"  # ancho fijo en UTC: el orden de texto es el orden temporal
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS payment_attempts (
@@ -96,24 +95,14 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _to_text(moment: datetime) -> str:
-    if moment.tzinfo is None:
-        moment = moment.replace(tzinfo=timezone.utc)
-    return moment.astimezone(timezone.utc).strftime(TIMESTAMP_FORMAT)
-
-
-def _to_datetime(text: str) -> datetime:
-    return datetime.fromisoformat(text)
-
-
 def _event_period(cohort: str, date_from: datetime | None, date_to: datetime | None) -> tuple[str, list[str]]:
     conditions, params = ["cohort = ?"], [cohort]
     if date_from is not None:
         conditions.append("occurred_at >= ?")
-        params.append(_to_text(date_from))
+        params.append(to_text(date_from))
     if date_to is not None:
         conditions.append("occurred_at < ?")
-        params.append(_to_text(date_to))
+        params.append(to_text(date_to))
     return " AND ".join(conditions), params
 
 
@@ -123,7 +112,7 @@ def _attempt_from_row(row: sqlite3.Row) -> Attempt:
         amount_cents=row["amount_cents"], recipient=row["recipient"], channel=row["channel"],
         intent_id=row["intent_id"], attempt_window_index=row["attempt_window_index"], status=row["status"],
         provider_payment_id=row["provider_payment_id"], retry_of_payment_id=row["retry_of_payment_id"],
-        created_at=_to_datetime(row["created_at"]), updated_at=_to_datetime(row["updated_at"]),
+        created_at=to_datetime(row["created_at"]), updated_at=to_datetime(row["updated_at"]),
     )
 
 
@@ -131,8 +120,8 @@ def _request_from_row(row: sqlite3.Row) -> RequestRecord:
     return RequestRecord(
         request_id=row["request_id"], correlation_id=row["correlation_id"],
         idempotency_key=row["idempotency_key"], payment_id=row["payment_id"], payer_id=row["payer_id"],
-        request_type=row["request_type"], requested_at=_to_datetime(row["requested_at"]),
-        original_requested_at=_to_datetime(row["original_requested_at"]),
+        request_type=row["request_type"], requested_at=to_datetime(row["requested_at"]),
+        original_requested_at=to_datetime(row["original_requested_at"]),
         retry_of_payment_id=row["retry_of_payment_id"],
     )
 
@@ -141,23 +130,13 @@ class SqliteIdempotencyStore:
     def __init__(self, db_path: str, clock: Callable[[], datetime] = _utc_now) -> None:
         self._db_path = db_path
         self._clock = clock
-        with self._connection() as con:
-            con.execute("PRAGMA journal_mode=WAL")
-            con.executescript(SCHEMA)
+        initialize_schema(db_path, SCHEMA)
 
-    @contextmanager
-    def _connection(self) -> Iterator[sqlite3.Connection]:
-        con = sqlite3.connect(self._db_path, timeout=BUSY_TIMEOUT_SECONDS)
-        con.row_factory = sqlite3.Row
-        con.execute("PRAGMA foreign_keys=ON")
-        try:
-            with con:
-                yield con
-        finally:
-            con.close()
+    def _connection(self) -> AbstractContextManager[sqlite3.Connection]:
+        return connection(self._db_path)
 
     def reserve_attempt(self, attempt: NewAttempt) -> ReserveOutcome:
-        created = _to_text(attempt.created_at)
+        created = to_text(attempt.created_at)
         try:
             with self._connection() as con:
                 con.execute(
@@ -182,7 +161,7 @@ class SqliteIdempotencyStore:
             cursor = con.execute(
                 "UPDATE payment_attempts SET status = ?, provider_payment_id = COALESCE(?, provider_payment_id),"
                 " updated_at = ? WHERE payment_id = ? AND status = ?",
-                (status, provider_payment_id, _to_text(self._clock()), payment_id, STATUS_PENDING),
+                (status, provider_payment_id, to_text(self._clock()), payment_id, STATUS_PENDING),
             )
         return cursor.rowcount > 0
 
@@ -227,7 +206,7 @@ class SqliteIdempotencyStore:
             cursor = con.execute(
                 "INSERT OR IGNORE INTO analytics_events (event_type, intent_id, payer_id, cohort, occurred_at,"
                 " payment_id, result) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (event.event_type, event.intent_id, event.payer_id, event.cohort, _to_text(event.occurred_at),
+                (event.event_type, event.intent_id, event.payer_id, event.cohort, to_text(event.occurred_at),
                  event.payment_id, event.result),
             )
         return cursor.rowcount > 0
@@ -262,7 +241,7 @@ class SqliteIdempotencyStore:
         with self._connection() as con:
             cursor = con.execute(
                 "INSERT OR IGNORE INTO payment_discrepancies (payment_id, kind, detected_at) VALUES (?, ?, ?)",
-                (discrepancy.payment_id, discrepancy.kind, _to_text(discrepancy.detected_at)),
+                (discrepancy.payment_id, discrepancy.kind, to_text(discrepancy.detected_at)),
             )
         return cursor.rowcount > 0
 
@@ -270,7 +249,7 @@ class SqliteIdempotencyStore:
         with self._connection() as con:
             rows = con.execute("SELECT * FROM payment_discrepancies ORDER BY seq LIMIT ?",
                                (MAX_LISTED_ROWS,)).fetchall()
-        return [Discrepancy(row["payment_id"], row["kind"], _to_datetime(row["detected_at"])) for row in rows]
+        return [Discrepancy(row["payment_id"], row["kind"], to_datetime(row["detected_at"])) for row in rows]
 
     def count_attempts(self) -> int:
         with self._connection() as con:
@@ -283,8 +262,8 @@ class SqliteIdempotencyStore:
                 " request_type, requested_at, original_requested_at, retry_of_payment_id)"
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (record.request_id, record.correlation_id, record.idempotency_key, record.payment_id,
-                 record.payer_id, record.request_type, _to_text(record.requested_at),
-                 _to_text(record.original_requested_at), record.retry_of_payment_id),
+                 record.payer_id, record.request_type, to_text(record.requested_at),
+                 to_text(record.original_requested_at), record.retry_of_payment_id),
             )
 
     def list_requests(self, filters: RequestFilters) -> list[RequestRecord]:
@@ -296,10 +275,10 @@ class SqliteIdempotencyStore:
                 params.append(value)
         if filters.date_from is not None:
             conditions.append("requested_at >= ?")
-            params.append(_to_text(filters.date_from))
+            params.append(to_text(filters.date_from))
         if filters.date_to is not None:
             conditions.append("requested_at <= ?")
-            params.append(_to_text(filters.date_to))
+            params.append(to_text(filters.date_to))
         where = f" WHERE {' AND '.join(conditions)}" if conditions else ""
         with self._connection() as con:
             rows = con.execute(

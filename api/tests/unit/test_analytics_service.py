@@ -79,7 +79,7 @@ def test_el_reporte_filtra_por_periodo_y_cohorte(make_world, submit, clock):
     hoy = clock()
     assert world.analytics.checkout_funnel(date_to=hoy).succeeded == 0
     assert world.analytics.checkout_funnel(date_from=hoy).succeeded == 1
-    otra = make_world(cohort="MVP_PE")
+    otra = make_world(cohort="MVP-PE")
     assert otra.analytics.checkout_funnel().succeeded == 0
 
 
