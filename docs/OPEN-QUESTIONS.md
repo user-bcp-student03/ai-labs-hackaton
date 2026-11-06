@@ -1,0 +1,132 @@
+# Registro de preguntas abiertas y supuestos
+
+Registro único de **todas** las preguntas abiertas y supuestos sin resolver de las historias y los cambios OpenSpec del MVP de wallet en Perú. Los artefactos de cada cambio referencian estos ids (OQ-xx).
+
+> Reglas de uso
+> - Estado **Abierta**: ningún agente puede responderla; la responde el rol propietario y se actualiza este registro. Estado **Decidida (fecha)**: la respuesta fue tomada por una persona y figura en el registro de decisiones (sección 0); ya no bloquea.
+> - «**BLOQUEA**» = el desarrollo de la parte indicada no debe iniciarse (o cerrarse) sin respuesta. «**Avanza**» = se puede desarrollar con un valor configurable provisional. «**Confirmar antes de cerrar**» = se puede iniciar con el supuesto declarado, pero la tarea no se da por cerrada sin confirmación.
+> - «**Fase**»: **1** = alcance prioritario (IDEM, ONB, PAYER); **2** = MERCH, FAIL, RECON (no priorizados). «1 (afecta 2)» = se decide en Fase 1 pero obliga a reconciliar un cambio de Fase 2; «1 y 2» = afecta a cambios de ambas fases.
+> - Todo valor provisional es solo una **sugerencia («propuesta, no aprobada»)** y no debe fijarse en código ni en las specs.
+> - Glosario de términos: [GLOSSARY.md](GLOSSARY.md). Trazabilidad: [TRACEABILITY.md](TRACEABILITY.md).
+> - Roles propietarios: Producto, Operaciones, Soporte, Cumplimiento, Analítica, Arquitectura.
+
+Cambios: **IDEM** = `payment-idempotency-protection`, **PAYER** = `payer-low-value-payment-confirmation`, **FAIL** = `payment-failure-reversal-handling`, **MERCH** = `merchant-qr-payment-status-visibility`, **RECON** = `ops-transaction-reconciliation`, **ONB** = `user-onboarding-mvp-completion`. Origen: **HU** = pregunta o supuesto de la historia; **Análisis** = detectada en esta auditoría.
+
+## 0. Registro de decisiones (2026-11-06)
+
+Decisiones tomadas por una persona el **2026-11-06**. Detalle de cada una en la fila correspondiente (secciones 1 a 4).
+
+| Decisión | Opción elegida | Cambios afectados | Fecha |
+|---|---|---|---|
+| OQ-01 — Momento y componente de generación de la clave | **Híbrida**: el flujo del pagador genera un identificador de intención al abrir la confirmación; el servidor lo incluye en la derivación de la clave junto con pagador + monto + destino + ventana de intento | IDEM (2.1), PAYER (1.4, 5.2); Fase 2: FAIL | 2026-11-06 |
+| OQ-02 — Semántica de «reintentar» | **Nuevo intento vinculado** al original: nueva clave, nueva referencia y vínculo «reintento de»; la clave original sigue devolviendo el resultado original | IDEM (2.5), PAYER (5.1, 5.3); Fase 2: FAIL (2.3, 6.3) | 2026-11-06 |
+| OQ-03 — Verificación del intento previo | **Se conserva y bloquea** mientras el previo esté en proceso o incierto; **permite** cuando es terminal (fallido o expirado) | PAYER (5.4, 5.5) | 2026-11-06 |
+| OQ-14 — Marcado original/duplicado hacia conciliación | **Diferir**: IDEM expone tipo, vínculo al original y ambas fechas; la regla de asignación por día la decide conciliación en Fase 2 | IDEM (5.1, 5.3); Fase 2: RECON (1.5, 3.x, 5.2, 5.4) | 2026-11-06 |
+| OQ-19 — Pasos y KYC del onboarding | **Motor de pasos configurable**; el KYC real sigue pendiente de Cumplimiento como dependencia externa y NO bloquea el motor | ONB (1.1, 1.7, 2.x, 3.x, 7.1) | 2026-11-06 |
+
+Nuevas preguntas **agregadas por análisis** tras la actualización de PAYER: OQ-38, OQ-39 y OQ-40 (sección 3). Son supuestos ya materializados en la spec de PAYER que requieren confirmación.
+
+### 0.1 Notas para Fase 2 (las specs de Fase 2 NO se modifican en esta actualización)
+
+- **FAIL (`payment-failure-reversal-handling`) — OQ-01 y OQ-02:** su propuesta, diseño, spec (escenario «Reintento de soporte sin duplicidad financiera») y tareas 2.3 y 6.3 todavía tratan la semántica del «reintento de soporte» como pregunta abierta y la marcan como bloqueante. Con OQ-02 decidida (nuevo intento vinculado, no reutilización de clave) esa redacción debe **reconciliarse** antes de priorizar FAIL, incluyendo si el reintento de soporte también crea un intento «reintento de» y si debe pasar por la verificación del intento previo (OQ-03).
+- **RECON (`ops-transaction-reconciliation`) — OQ-14:** su spec (escenarios del requisito «Distinción de originales y reintentos duplicados en reporte y resumen») y sus tareas 1.5 y 3.1 aún marcan como pendiente la forma de exponer el marcado y el día asignado. Con OQ-14 decidida, la **regla de asignación por día pasa a ser decisión de conciliación en Fase 2**; debe además distinguir el «reintento vinculado» (nuevo intento, OQ-02) del «reintento duplicado».
+
+## 1. Decisiones transversales (entre cambios)
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-01 | 1 (afecta 2) | ¿En qué momento y en qué componente se genera la clave de idempotencia: al abrir la confirmación de pago (flujo del pagador) o derivada de pagador, monto, destino y ventana de intento (IDEM)? ¿Incluye un identificador de intención? | IDEM, PAYER, FAIL | Dos cambios definen la clave de forma distinta; sin acuerdo la clave puede divergir o tratar como duplicados a pagos legítimos. | Arquitectura (con Producto) | No bloquea (decidida). IDEM 2.1 y PAYER 5.2 pueden implementarse; FAIL (Fase 2) debe reconciliarse. | Análisis (cambios hermanos) | **Decidida (2026-11-06)**: híbrida — el flujo del pagador genera un identificador de intención al abrir la confirmación; el servidor lo incluye en la derivación de la clave junto con pagador + monto + destino + ventana. |
+| OQ-02 | 1 (afecta 2) | ¿Qué significa «reintentar» tras un resultado fallido/expirado: nuevo intento vinculado al original (nueva clave y referencia) o reutilización de la clave? Reutilizarla devolvería el resultado original (fallido) en lugar de reintentar el pago. | IDEM, PAYER, FAIL | Contradicción potencial entre PAYER crit. 4, FAIL (reintento de soporte) e IDEM crit. 2. | Producto (con Arquitectura) | No bloquea (decidida). IDEM 2.5 y PAYER 5.1-5.3 pueden implementarse; la redacción de «reintento de soporte» en FAIL (Fase 2) debe reconciliarse. | Análisis | **Decidida (2026-11-06)**: «reintentar» crea un NUEVO intento vinculado al original (nueva clave, nueva referencia, vínculo «reintento de»); la clave original sigue devolviendo el resultado original. |
+| OQ-03 | 1 | ¿PAYER conserva la «verificación del intento previo» (consultar el estado del intento anterior antes de permitir uno nuevo) para no cobrar dos veces si el anterior quedó incierto o se confirma tarde? | PAYER, IDEM, FAIL | Sin ella, un reintento rápido puede duplicar el cobro; con ella, añade una consulta al flujo y puede bloquear al pagador. | Arquitectura (con Producto) | No bloquea (decidida). PAYER 5.4 y 5.5 pueden implementarse; sus supuestos de alcance y de «incierto» están en OQ-38 a OQ-40. | Análisis | **Decidida (2026-11-06)**: se conserva la verificación del intento previo y se impide el nuevo intento mientras el anterior esté en proceso o incierto; se permite cuando es terminal (fallido o expirado). |
+| OQ-04 | 1 y 2 | Supuesto: la referencia de transacción se asigna desde la creación del intento (no al llegar a `exitoso`). ¿Se confirma? | PAYER, MERCH, FAIL, RECON | MERCH muestra intentos aún no exitosos, FAIL registra fallidos con referencia y RECON la usa como clave de cruce. | Arquitectura | Avanza con el supuesto (propuesta, no aprobada: asignar al crear el intento; mostrar al pagador solo en éxito). | Análisis | Abierta |
+| OQ-05 | 1 | ¿Qué evento alimenta oficialmente el MAU: estado de wallet `activo` (ONB), evento de activación del pagador (PAYER) o ambos? ¿Cómo se define el MAU (p. ej., qué cuenta como usuario activo mensual)? | ONB, PAYER | Hay dos significados de «activación» (ver [glosario](GLOSSARY.md)); sin definición no se puede verificar el rango 1,000–2,000. | Analítica (con Producto) | Avanza: el evento se emite con referencia, pagador, marca de tiempo y cohorte. Propuesta, no aprobada: MAU = pagadores distintos con ≥1 evento de activación en el mes. | HU (ONB, PAYER) | Abierta |
+| OQ-06 | 1 | ¿Cómo se determina la pertenencia a la cohorte MVP Perú (país del documento, línea telefónica, geografía de adquisición, otro)? | ONB, PAYER | Todos los objetivos cuantitativos se miden sobre esa cohorte. | Analítica (con Producto) | Avanza con atributo de cohorte configurable. Propuesta, no aprobada: asignarlo al inicio del onboarding. | Análisis | Abierta |
+| OQ-07 | 1 | ¿Quién produce el reporte consolidado que compara MAU con 1,000–2,000 y CAC con PEN 10 en los meses 1-3? ONB y PAYER solo exponen datos y declaran el reporte fuera de alcance. | ONB, PAYER (épica) | Ningún cambio cubre la verificación final de MAU y CAC: queda un objetivo de la épica sin responsable. | Analítica (con Producto) | Avanza (no bloquea desarrollo de HU); **bloquea** la verificación de los objetivos de la épica. | Análisis | Abierta |
+| OQ-08 | 2 | ¿Qué flujo/capability crea el intento de pago QR cuando el cliente paga a un comercio? Ninguna HU lo cubre (PAYER trata transferencias de bajo monto; MERCH solo visibilidad). ¿IDEM, PAYER y FAIL aplican también al pago QR? | MERCH, PAYER, IDEM | MERCH asume que el intento existe; sin dueño no hay origen de los datos ni pruebas de extremo a extremo. | Producto (con Arquitectura) | **BLOQUEA** MERCH 1.1 y 4.1 (pruebas de extremo a extremo). El modelo puede avanzar con proveedor simulado. | Análisis | Abierta |
+| OQ-09 | 2 | ¿Cuáles son exactamente los canales de proveedor del MVP y cuál es la referencia de transacción común (o mapeable) entre wallet y proveedor para el cruce? | RECON, IDEM, MERCH | RECON no puede cruzar ni filtrar por canal sin ambos datos; IDEM aplica por canal. | Operaciones (con Arquitectura) | **BLOQUEA** RECON 2.1 y 2.2. | HU (supuesto RECON) | Abierta |
+| OQ-10 | 1 y 2 | Cuando el proveedor confirma un intento ya `expirado`: ¿qué se comunica al pagador, se corrige el historial o solo se registra la discrepancia? ¿Quién la trata (soporte o conciliación)? | PAYER, FAIL, RECON | El pagador recibió «expirado» pero los fondos pudieron moverse; riesgo financiero y de confianza. | Operaciones (con Soporte y Producto) | Avanza: PAYER conserva el resultado terminal y registra la discrepancia (comportamiento ya especificado). | Análisis | Abierta |
+
+## 2. payment-idempotency-protection (IDEM) — Fase 1
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-11 | 1 | ¿Cuál es la ventana de retención de claves de idempotencia por canal? ¿Qué ocurre con una solicitud cuya clave ya venció (nuevo intento o rechazo)? | IDEM (también FAIL) | Una retención corta permite un segundo cobro por un reintento tardío; una larga ocupa almacenamiento. | Operaciones (con Producto) | Avanza (configurable). Propuesta, no aprobada: 24 horas por canal. | HU | Abierta |
+| OQ-12 | 1 | Supuesto: la duración de la «ventana de intento» que forma parte de la clave es configurable. ¿Qué valor? | IDEM, PAYER | Ventana larga trata como duplicados a pagos legítimos idénticos; corta deja pasar duplicados. | Producto | Avanza (configurable). Propuesta, no aprobada: 5 minutos. | Análisis (supuesto del diseño) | Abierta |
+| OQ-13 | 1 | ¿Por cuánto tiempo se conserva el registro de auditoría de duplicados? | IDEM | Volumen de datos y obligaciones de auditoría. | Cumplimiento (con Operaciones) | Avanza. Propuesta, no aprobada: sin purga hasta definir política. | Análisis (supuesto del diseño) | Abierta |
+| OQ-14 | 1 (afecta 2) | ¿Cómo expone IDEM el marcado original/duplicado a RECON y a qué día se asigna un reintento duplicado cuya solicitud original cae en otro día? | IDEM, RECON | Condiciona el formato de consumo de RECON y los totales por día. | Arquitectura (con Operaciones) | No bloquea (decidida). IDEM 5.1 y 5.3 pueden implementarse; la regla de asignación por día queda para RECON (Fase 2). | HU (supuesto RECON) | **Decidida (2026-11-06)**: diferir — IDEM expone tipo, vínculo al original y ambas fechas (solicitud y original); la regla de asignación por día la decide conciliación en Fase 2. |
+
+## 3. payer-low-value-payment-confirmation (PAYER) — Fase 1
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-15 | 1 | ¿Qué regla inicial de monto bajo se configurará para el lanzamiento MVP por proveedor/canal? | PAYER | Define la validación previa al envío y los mensajes de límite. | Producto (con Cumplimiento) | Avanza (configurable). Propuesta, no aprobada: usar como tope el límite del proveedor/canal. | HU | Abierta |
+| OQ-16 | 1 | Supuesto: ¿cuáles son las etiquetas visibles de los tres estados terminales? | PAYER | Texto mostrado al pagador. | Producto | Avanza (contenido configurable). Propuesta, no aprobada: «Exitoso», «Fallido», «Expirado». | HU | Abierta |
+| OQ-17 | 1 | ¿Cuál es el tiempo máximo de un intento antes de pasar a `expirado`? | PAYER | Corto expira pagos que luego se confirman; largo degrada la percepción de espera. | Producto (con Operaciones) | Avanza (configurable). Propuesta, no aprobada: 120 segundos. | Análisis | Abierta |
+| OQ-18 | 1 | ¿Cómo se define «caída en checkout» y «abandono» (numerador, denominador) y con qué criterio se midió la línea base de 30%? | PAYER | Sin fórmula, el objetivo de 8% no es verificable ni comparable con la línea base. | Analítica (con Producto) | Avanza: se registran los eventos y los conteos. **Bloquea** la verificación del 8%. Propuesta, no aprobada: tasa = intentos iniciados que no llegan a `exitoso` ÷ intentos iniciados. | HU (supuesto) | Abierta |
+| OQ-38 | 1 | Supuesto (agregado por análisis): el «intento previo» que se verifica antes de permitir un nuevo intento es el de la **misma intención de pago** (pagador, monto y destino). ¿Se confirma, o debe bloquear también cualquier otro intento en proceso del mismo pagador? | PAYER (también IDEM) | Define el alcance del bloqueo decidido en OQ-03: demasiado amplio impide pagos legítimos distintos; demasiado estrecho deja pasar cobros duplicados. | Producto (con Arquitectura) | Avanza con el supuesto de la spec (propuesta, no aprobada: misma intención de pago). **Confirmar antes de cerrar** PAYER 5.4. | Agregado por análisis (supuesto de la spec PAYER) | Abierta |
+| OQ-39 | 1 | Supuesto (agregado por análisis): «incierto» **no es un estado nuevo** de la máquina de estados del intento, sino un intento sin resultado terminal cuyo estado no pudo confirmarse con el proveedor. ¿Se confirma? ¿Qué condiciones concretas (sin respuesta, respuesta contradictoria, otras) cuentan como «no confirmado»? | PAYER (se relaciona con FAIL y RECON) | Evita ampliar la máquina de estados; debe alinearse con el «estado incierto» de soporte (OQ-32), que es una clasificación distinta (ver [glosario](GLOSSARY.md)). | Arquitectura (con Operaciones) | Avanza con el supuesto de la spec (propuesta, no aprobada). **Confirmar antes de cerrar** PAYER 5.4 (tarea 1.5). | Agregado por análisis (supuesto de la spec PAYER) | Abierta |
+| OQ-40 | 1 | Supuesto (agregado por análisis): una verificación del intento previo que **no se completa** (falla de la consulta o tiempo agotado) se trata como incierto y **bloquea**. ¿Se confirma? ¿Qué se muestra al pagador y por cuánto tiempo puede mantenerse el bloqueo? | PAYER | Prioriza no cobrar dos veces sobre la disponibilidad: si el proveedor no responde, el pagador queda bloqueado. El bloqueo se levanta cuando el previo llega a un estado terminal, incluida la expiración por tiempo máximo (OQ-17). | Arquitectura (con Producto) | Avanza con el supuesto de la spec (propuesta, no aprobada). **Confirmar antes de cerrar** PAYER 5.4 y 5.5; la duración efectiva del bloqueo depende de OQ-17. | Agregado por análisis (supuesto de la spec PAYER) | Abierta |
+
+## 4. user-onboarding-mvp-completion (ONB) — Fase 1
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-19 | 1 | ¿Qué requisitos de KYC y documentación exige el onboarding? | ONB (y PAYER indirectamente) | Define los pasos, los datos obligatorios, las validaciones y el tiempo total frente a la meta de 3 minutos. | Cumplimiento (con Producto) | No bloquea el motor (decidida). ONB 2.x y 3.x se construyen con pasos «ejemplo no aprobado». Dependencia externa: el contenido real de KYC sigue pendiente de Cumplimiento y se cargará como configuración. | HU (supuesto) | **Decidida (2026-11-06)**: motor de pasos configurable. El KYC real sigue pendiente de Cumplimiento como dependencia externa y NO bloquea el motor. |
+| OQ-20 | 1 | ¿Qué frontera de eventos analíticos define oficialmente la duración de onboarding (marca de inicio y de fin)? | ONB | Define la mediana frente a 8 → 3 minutos. | Analítica (con Producto) | Avanza (se registran todas las marcas). Propuesta, no aprobada: inicio = evento de inicio; fin = cierre por finalización exitosa. | HU | Abierta |
+| OQ-21 | 1 | ¿El evento de «cierre del flujo» se emite solo al finalizar con éxito o también por abandono/cancelación? ¿Cómo se determina el abandono? | ONB | Afecta la duración, las tasas de conversión y el conteo de nuevos usuarios. | Analítica (con Producto) | Avanza. Propuesta, no aprobada: cierre solo por finalización exitosa y abandono medido por inactividad configurable. | Análisis | Abierta |
+| OQ-22 | 1 | ¿Cuál es la fuente y el momento de captura del gasto de adquisición y cómo se define «usuario nuevo» para el CAC? | ONB | Sin fuente no se puede calcular CAC (PEN 10). | Analítica (con Producto) | **BLOQUEA** ONB 6.2. El resto de ONB avanza. | HU (supuesto) | Abierta |
+| OQ-23 | 1 | Supuesto: ¿cómo se llaman los estados de wallet distintos de `activo`? | ONB | Modelo de estados y analítica. | Producto | Avanza. Propuesta, no aprobada: `pendiente`. | Análisis (supuesto del diseño) | Abierta |
+
+## 5. merchant-qr-payment-status-visibility (MERCH) — Fase 2 (no priorizada)
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-24 | 2 | ¿Cuál es el conjunto mínimo de estados que necesita el comercio en el lanzamiento MVP? ¿Coincide con los estados terminales del pagador? ¿Qué se muestra ante un estado del proveedor sin equivalente? | MERCH, RECON, PAYER | De él depende cuándo el comercio entrega el producto; RECON compara estos estados. | Producto (con Operaciones) | **BLOQUEA** MERCH 1.2 y 1.3 en su versión final (mapeo y textos). El modelo con mapeo configurable puede avanzar. Propuesta, no aprobada: reutilizar los cinco estados del intento. | HU | Abierta |
+| OQ-25 | 2 | Supuesto: ¿cuál es el canal de consulta del comercio: app, web o ambos? | MERCH | Determina el mecanismo de actualización de la vista y la interfaz. | Producto | **BLOQUEA** MERCH 3.3 (mecanismo de refresco). El resto avanza. | HU (supuesto) | Abierta |
+| OQ-26 | 2 | ¿Qué proveedores de adquirencia/gateway se usarán y qué garantías ofrecen sus callbacks (orden, reintentos, firma)? | MERCH, RECON, FAIL | Determina la validación de origen, la deduplicación y el mapeo de motivos. | Arquitectura (con Producto) | **BLOQUEA** MERCH 2.1 contra un proveedor real; puede avanzar con proveedor simulado. | Análisis | Abierta |
+| OQ-27 | 2 | ¿Cuál es la retención y el rango máximo del historial consultable? ¿La fecha filtrada es la de creación del intento o la del cambio de estado? ¿Qué zona horaria se usa? | MERCH | Define el filtro por fecha (criterio 4). | Producto (con Cumplimiento) | Avanza (configurable). Propuesta, no aprobada: 90 días; fecha de creación del intento. | Análisis | Abierta |
+| OQ-28 | 2 | ¿Cuál es el plazo máximo entre aplicar un evento y reflejarlo en la vista del comercio? | MERCH | Hace medible el criterio 3 («se actualiza»). | Producto (con Operaciones) | Avanza (configurable). Propuesta, no aprobada: 30 segundos. | Análisis | Abierta |
+
+## 6. payment-failure-reversal-handling (FAIL) — Fase 2 (no priorizada)
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-29 | 2 | ¿Qué categorías de disputa se habilitan en MVP y cuáles se difieren a post-MVP? | FAIL | Define cuándo un pago es elegible para el flujo de disputa. | Producto (con Cumplimiento) | **BLOQUEA** habilitar la ruta de disputa. El modelo base avanza con categorías configurables. | HU | Abierta |
+| OQ-30 | 2 | Supuesto: ¿cuáles son los niveles de escalamiento y los SLA de soporte por ruta? | FAIL | Contenido de la ruta de ayuda y operación de soporte. | Soporte (con Operaciones) | Avanza (no se codifican SLA). | HU (supuesto) | Abierta |
+| OQ-31 | 2 | ¿Qué proveedores/rieles exponen motivos de falla utilizables para el mapeo al catálogo interno? | FAIL | Cobertura de la taxonomía. | Arquitectura | Avanza con el código «no clasificado» y conservando el motivo original. | Análisis | Abierta |
+| OQ-32 | 2 | ¿Qué fuente determina que una transferencia fue ejecutada o que su estado es incierto (resultado del proveedor, asiento de ledger, ambos)? | FAIL, RECON | La regla de elegibilidad (reintento / investigación / disputa) depende de ella; error = riesgo de duplicidad. | Operaciones (con Arquitectura) | **BLOQUEA** la versión definitiva de FAIL 2.1. Propuesta, no aprobada: ante duda, clasificar como incierto (investigación). | Análisis | Abierta |
+| OQ-33 | 2 | ¿Cuáles son los estados de resolución de las acciones de soporte y cómo se relacionan con los estados de investigación de RECON (mismo caso o entidades distintas)? | FAIL, RECON | Evita registrar dos veces el mismo caso o perder el seguimiento. | Soporte (con Operaciones) | Avanza con estados mínimos. Propuesta, no aprobada: «abierto», «en curso», «resuelto». | Análisis | Abierta |
+
+## 7. ops-transaction-reconciliation (RECON) — Fase 2 (no priorizada)
+
+| Id | Fase | Pregunta / supuesto | Afecta | Por qué importa / qué bloquea | Propietario | ¿Bloquea? / valor provisional | Origen | Estado |
+|---|---|---|---|---|---|---|---|---|
+| OQ-34 | 2 | ¿Cuál es la tasa máxima diaria de descalce aceptable para la preparación del lanzamiento? | RECON | Criterio objetivo de preparación para el lanzamiento. | Operaciones (con Cumplimiento) | Avanza: el resumen solo informa totales, sin evaluar umbral. | HU | Abierta |
+| OQ-35 | 2 | ¿Cuál es la hora de corte y la zona horaria del día conciliado y cómo se tratan los estados asíncronos aún pendientes? | RECON | Un pendiente puede aparecer como descalce falso. | Operaciones | Avanza (configurable). Propuesta, no aprobada: día calendario en America/Lima. | Análisis | Abierta |
+| OQ-36 | 2 | ¿Cuál es el catálogo definitivo de tipos de descalce y de estados de investigación? | RECON | Define el marcado y el seguimiento (criterio 2). | Operaciones | Avanza con el catálogo de trabajo del diseño. | Análisis (supuesto del diseño) | Abierta |
+| OQ-37 | 2 | En el resumen diario, ¿un descalce resuelto se resta de «no conciliados» o se informa como subconjunto de ellos? | RECON | Ambigüedad en los totales del criterio 4. | Operaciones | Avanza. Propuesta, no aprobada: «resueltos» como subconjunto de «no conciliados». | Análisis | Abierta |
+
+## 8. Resumen por impacto
+
+### 8.1 Por tipo de impacto (tras las decisiones del 2026-11-06)
+
+| Tipo | Ids |
+|---|---|
+| **Decididas** (2026-11-06; ya no bloquean) | OQ-01, OQ-02, OQ-03, OQ-14, OQ-19 |
+| Bloquean desarrollo de una HU (parcial o total) — Fase 1 | OQ-22 (ONB 6.2) |
+| Bloquean desarrollo de una HU (parcial o total) — Fase 2 | OQ-08, OQ-09, OQ-24, OQ-25, OQ-26, OQ-29, OQ-32 |
+| Bloquean solo la verificación de objetivos de la épica | OQ-07, OQ-18 |
+| Confirmar antes de cerrar una tarea (se inicia con el supuesto declarado) | OQ-38, OQ-39, OQ-40 (PAYER 5.4/5.5) |
+| Avanzan con valor provisional configurable | OQ-04, OQ-05, OQ-06, OQ-10, OQ-11, OQ-12, OQ-13, OQ-15, OQ-16, OQ-17, OQ-20, OQ-21, OQ-23, OQ-27, OQ-28, OQ-30, OQ-31, OQ-33, OQ-34, OQ-35, OQ-36, OQ-37 |
+
+### 8.2 Qué sigue bloqueando cada cambio de Fase 1 (reevaluado tras las decisiones)
+
+| Cambio | ¿Qué bloquea el **inicio**? | ¿Qué condiciona el **cierre** o la verificación? | Dependencias que no son preguntas |
+|---|---|---|---|
+| **IDEM** | Ninguna pregunta abierta. | OQ-11, OQ-12 (tarea 1.1) y OQ-13 (tarea 1.4): se aprueban los valores, que ya quedan como configuración con propuesta provisional no aprobada. | 1.2 y 5.3: los equipos de PAYER, FAIL y RECON deben acordar/confirmar el contrato (RECON es Fase 2: el cierre de 5.3 requiere su confirmación del formato). Con PAYER: contrato de entrada del identificador de intención (PAYER 1.4). |
+| **ONB** | **OQ-22 bloquea la tarea 6.2** (atribución del gasto de adquisición / CAC). El resto de ONB avanza. | OQ-20 (frontera de eventos) para cerrar 5.3, que lo exige antes de cerrarse; OQ-05 (glosario de «activación» aprobado, tarea 1.3) para cerrar 6.3; OQ-21, OQ-06, OQ-07, OQ-23 (tareas 1.4 a 1.6) con valor provisional. | KYC real pendiente de Cumplimiento (OQ-19 decidida): **no bloquea el motor**; 2.x, 3.x y 7.1 se prueban con pasos «ejemplo no aprobado». Sin los pasos reales de Cumplimiento no hay recorrido real de usuarios. |
+| **PAYER** | Ninguna pregunta abierta bloquea el inicio. | **OQ-38, OQ-39, OQ-40** (confirmar antes de cerrar 5.4 y 5.5); OQ-17 (el valor del tiempo máximo fija cuánto puede durar el bloqueo por un previo incierto); OQ-15, OQ-16 (configurables); OQ-04 y OQ-10 (tarea 1.6); OQ-05, OQ-06 y OQ-18 para verificar 7.1 a 7.3 y el objetivo de 8%. | Requiere IDEM (derivación de la clave, resultado original) y que el contrato del identificador de intención esté acordado (tarea 1.4); el acceso al flujo exige wallet `activo` (ONB 4.2). |
+
+### 8.3 Fase 2 (no priorizada)
+
+Las preguntas OQ-08, OQ-09, OQ-24 a OQ-37 siguen abiertas y no se reevalúan hasta priorizar MERCH, FAIL y RECON. Antes de priorizarlos hay que reconciliar sus textos con las decisiones OQ-01, OQ-02 y OQ-14 (ver sección 0.1).

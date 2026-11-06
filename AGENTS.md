@@ -82,3 +82,24 @@ En el Dia 1 usa solo ramas locales: day1/prompting, main y checkpoint/day1. Cons
     `login()` hoy); usar retorno anticipado o condiciones combinadas.
 12. Sin valores "mágicos" sueltos en el código (URLs, claves de
     `localStorage`); centralizarlos en un solo lugar.
+
+## wallet / hackaton
+
+Rama de trabajo: `feature/hackaton`, creada desde `main`. No contiene los
+componentes `auth/`, `api/` ni `web/`; las secciones anteriores aplican solo
+cuando esos componentes existan.
+
+### Flujo de épica y HUs
+
+1. La épica está en `docs/epic/` y cada HU en `docs/stories/`. Son documentos
+   de entrada: no se modifican sin acuerdo.
+2. Cada HU es un cambio OpenSpec propio en `openspec/changes/<nombre>/`. Se
+   genera con `opsx propose` y se mantiene con `opsx update`; no se escribe a
+   mano.
+3. Ciclo por HU: explore, propose, revisión humana, apply, sync y archive.
+   Trabaja una HU a la vez.
+4. Cada `proposal.md` enlaza la HU y la épica de origen, y declara alcance y
+   fuera de alcance. No inventes respuestas a las preguntas abiertas de las
+   HUs: déjalas como supuestos o preguntas pendientes.
+5. Los artefactos de OpenSpec se escriben en español.
+6. No hagas push, tags ni PR sin aprobación humana explícita.

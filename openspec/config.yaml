@@ -1,0 +1,26 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: true
+
+context: |
+  Write all artifacts in Spanish.
+  Epic: docs/epic/peru-wallet-mvp.sp.md. Each user story lives in docs/stories/
+  and maps to exactly one OpenSpec change.
+  Do not answer a story's open questions; keep them as assumptions or open questions.
+
+rules:
+  proposal:
+    - Link the source user story and the epic
+    - Always state what is in scope and out of scope
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
