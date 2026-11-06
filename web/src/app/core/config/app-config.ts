@@ -25,9 +25,17 @@ export const API_PATHS = {
   close: (onboardingId: string): string => `/onboarding/${encodeURIComponent(onboardingId)}/close`,
   wallet: '/wallet',
   paymentsEntry: '/wallet/payments-entry',
+  payments: '/payments',
+  paymentConfirmations: '/payments/confirmations',
+  paymentAbandon: (intentId: string): string => `/payments/confirmations/${encodeURIComponent(intentId)}/abandon`,
+  payment: (paymentId: string): string => `/payments/${encodeURIComponent(paymentId)}`,
+  paymentRetries: (paymentId: string): string => `/payments/${encodeURIComponent(paymentId)}/retries`,
 } as const;
 
 export const APP_ROUTES = {
   onboarding: '/onboarding',
   payments: '/payments',
+  paymentConfirm: '/payments/confirm',
+  paymentHistory: '/payments/history',
+  paymentResult: (paymentId: string): string => `/payments/result/${encodeURIComponent(paymentId)}`,
 } as const;

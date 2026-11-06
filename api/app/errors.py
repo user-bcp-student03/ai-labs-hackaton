@@ -16,6 +16,22 @@ class ProviderError(Exception):
     """El proveedor no respondió de forma utilizable; el resultado queda incierto."""
 
 
+class AmountExceedsLimit(Exception):
+    """El monto supera el límite configurado para el canal."""
+
+    def __init__(self, limit_cents: int) -> None:
+        super().__init__("monto sobre el límite")
+        self.limit_cents = limit_cents
+
+
+class PreviousAttemptInProgress(Exception):
+    """Un intento previo de la misma intención de pago sigue en proceso o incierto (decisión OQ-03)."""
+
+    def __init__(self, previous_payment_id: str) -> None:
+        super().__init__("intento previo sin resultado terminal")
+        self.previous_payment_id = previous_payment_id
+
+
 class FlowConfigError(Exception):
     """La configuración de pasos de onboarding no cumple el contrato; detiene el arranque."""
 

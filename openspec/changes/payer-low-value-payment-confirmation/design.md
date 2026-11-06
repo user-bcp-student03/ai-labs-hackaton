@@ -60,13 +60,17 @@ Decididas (2026-11-06; reflejadas en la decisión 2):
 
 Abiertas (no se responden aquí):
 
-- OQ-15: ¿qué regla inicial de monto bajo se configurará para el lanzamiento MVP por proveedor/canal? (Pregunta abierta de la HU.)- OQ-04: ¿en qué momento se asigna la referencia de transacción? (Se asume desde la creación del intento.)
-- OQ-05: ¿qué evento alimenta oficialmente el MAU y cómo se define el MAU?
-- OQ-06: ¿cómo se determina la pertenencia a la cohorte MVP Perú?
 - OQ-10: ¿qué ocurre de cara al pagador y al historial cuando un intento expirado se confirma tarde?
-- OQ-16: ¿cuáles son las etiquetas de los estados terminales?
-- OQ-17: ¿cuál es el tiempo máximo de un intento antes de expirar?
-- OQ-18: ¿cómo se define "caída en checkout" y "abandono" (y con qué criterio se midió la línea base de 30%)?
+
+Decididas el 2026-11-06 (registro: OPEN-QUESTIONS.md, sección 0):
+
+- OQ-15: el tope de monto es el límite del proveedor/canal, cargado como configuración.
+- OQ-04: la referencia de transacción se asigna al crear el intento.
+- OQ-05: MAU = pagadores distintos con al menos un evento de activación del pagador en el mes.
+- OQ-06: la cohorte MVP Perú se asigna al inicio del onboarding.
+- OQ-16: etiquetas «Exitoso», «Fallido» y «Expirado» (contenido configurable).
+- OQ-17: tiempo máximo del intento de 120 segundos (configurable).
+- OQ-18: tasa de caída = intentos iniciados que no llegan a `exitoso` ÷ intentos iniciados; la definición de «abandono» sigue pendiente.
 
 Supuestos (de la HU y la épica, sin resolver):
 

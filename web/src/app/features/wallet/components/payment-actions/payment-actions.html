@@ -1,0 +1,7 @@
+<div class="actions" role="group" aria-label="Qué puedes hacer ahora">
+  @for (action of actions(); track action.id) {
+    <button type="button" [class.secondary]="action.id !== 'retry'" [disabled]="busy()" (click)="select(action)">
+      {{ action.label }}
+    </button>
+  }
+</div>
