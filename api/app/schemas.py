@@ -14,6 +14,12 @@ Recipient = Literal["contact-demo", "merchant-demo"]  # lista permitida
 RequestType = Literal["original", "duplicate"]
 
 
+class ActionView(BaseModel):
+    id: str
+    label: str
+    payment_id: str | None = None
+
+
 class PaymentRequest(BaseModel):
     intent_id: Annotated[str, Field(min_length=1, max_length=MAX_INTENT_ID_LENGTH, pattern=IDENTIFIER_PATTERN)]
     amount_cents: Annotated[StrictInt, Field(gt=0, le=MAX_AMOUNT_CENTS)]
@@ -24,8 +30,11 @@ class PaymentRequest(BaseModel):
 class PaymentView(BaseModel):
     payment_id: str
     status: str
+    status_label: str
     idempotency_key: str
     retry_of: str | None = None
+    transaction_reference: str | None = None
+    actions: list[ActionView] = []
 
 
 class SubmittedPaymentView(PaymentView):
@@ -34,6 +43,51 @@ class SubmittedPaymentView(PaymentView):
 
 class PaymentDetailView(PaymentView):
     retried_by: list[str]
+
+
+class HistoryItemView(PaymentView):
+    amount_cents: int
+    recipient: str
+    created_at: datetime
+
+
+class ConfirmationRequest(BaseModel):
+    recipient: Recipient | None = None
+    amount_cents: Annotated[StrictInt, Field(gt=0, le=MAX_AMOUNT_CENTS)] | None = None
+    channel: Annotated[str, Field(pattern=CHANNEL_PATTERN)]
+
+
+class ConfirmationView(BaseModel):
+    can_confirm: bool
+    intent_id: str | None = None
+    recipient: str | None = None
+    amount_cents: int | None = None
+    reason: str | None = None
+    message: str | None = None
+    limit_cents: int | None = None
+    actions: list[ActionView] = []
+
+
+class FunnelReportView(BaseModel):
+    cohort: str
+    started: int
+    final_confirmations: int
+    succeeded: int
+    failed: int
+    expired: int
+    abandoned: int
+    drop_rate_pct: float | None
+    baseline_pct: float
+    target_pct: float
+
+
+class ActivePayersView(BaseModel):
+    month: str
+    cohort: str
+    active_payers: int
+    reference_min: int
+    reference_max: int
+    within_reference_range: bool
 
 
 class RequestRecordView(BaseModel):
