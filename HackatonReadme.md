@@ -8,7 +8,7 @@ Se trabajan dos historias del mismo usuario: el que transfiere a diario montos b
 
 | Historia | Usuario | Parte del wallet |
 |---|---|---|
-| [Registro y activación del MVP de wallet](./user-stories/user-onboarding-mvp-completion.sp.md) | Usuario de smartphone con transferencias diarias de bajo monto | Onboarding y activación, con instrumentación analítica |
+| [Registro y activación del MVP de wallet](./user-stories/user-onboarding-mvp-completion.sp.md) | Usuario con transferencias diarias de bajo monto | Onboarding y activación, con instrumentación analítica |
 | [Confirmación de pagos de bajo monto](./user-stories/payer-low-value-payment-confirmation.sp.md) | Pagador | Transferencia de bajo monto y resultado final del pago |
 
 Objetivos de la épica a los que contribuyen:
