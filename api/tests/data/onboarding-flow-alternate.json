@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "flow_id": "onboarding-alterno",
+  "approval_status": "example_not_approved",
+  "label": "Ejemplo no aprobado: configuración alterna solo para pruebas; no son requisitos de KYC ni regulatorios.",
+  "steps": [
+    {
+      "id": "perfil", "order": 2,
+      "title": "Perfil (ejemplo no aprobado)",
+      "description": "Elige un alias de prueba.",
+      "fields": [
+        { "name": "nickname", "type": "text", "label": "Alias", "hint": "Entre 3 y 12 letras minúsculas o números.",
+          "required": true, "required_message": "Escribe un alias para continuar.",
+          "autocomplete": "nickname", "input_mode": "text",
+          "rules": [
+            { "kind": "max_length", "value": 12, "message": "Acorta tu alias a 12 caracteres como máximo." },
+            { "kind": "pattern", "value": "[a-z0-9]{3,12}", "message": "Usa de 3 a 12 letras minúsculas o números; por ejemplo: ana2026." }
+          ] }
+      ]
+    },
+    {
+      "id": "bienvenida", "order": 1,
+      "title": "Bienvenida (ejemplo no aprobado)",
+      "fields": [
+        { "name": "accept_notice", "type": "checkbox", "label": "Leí el aviso de ejemplo",
+          "required": true, "required_message": "Marca la casilla para confirmar que leíste el aviso." }
+      ]
+    }
+  ]
+}

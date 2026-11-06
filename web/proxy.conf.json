@@ -1,0 +1,9 @@
+{
+  "/wallet-api": {
+    "target": "http://localhost:8000",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/wallet-api": "" },
+    "logLevel": "warn"
+  }
+}

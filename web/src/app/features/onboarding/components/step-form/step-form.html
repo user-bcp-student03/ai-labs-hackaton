@@ -1,0 +1,9 @@
+<form [formGroup]="form()" (ngSubmit)="submit()" novalidate [attr.aria-busy]="submitting()">
+  @if (summaryItems().length > 0) {
+    <app-error-summary [heading]="summaryHeading()" [items]="summaryItems()" (fieldSelected)="focusField($event)" />
+  }
+  @for (item of fields(); track item.field.name) {
+    <app-form-field [field]="item.field" [control]="item.control" [error]="errorByField().get(item.field.name) ?? null" />
+  }
+  <button class="step-form__submit" type="submit" [disabled]="submitting()">{{ submitLabel() }}</button>
+</form>

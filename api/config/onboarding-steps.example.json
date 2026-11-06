@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "flow_id": "onboarding-ejemplo",
+  "approval_status": "example_not_approved",
+  "label": "Ejemplo no aprobado: estos pasos son solo para demostración y pruebas; no son requisitos de KYC ni regulatorios.",
+  "steps": [
+    {
+      "id": "datos-personales", "order": 1,
+      "title": "Tus datos (ejemplo no aprobado)",
+      "description": "Completa tus datos para continuar.",
+      "fields": [
+        { "name": "full_name", "type": "text", "label": "Nombre completo", "required": true,
+          "required_message": "Escribe tu nombre completo.",
+          "autocomplete": "name", "input_mode": "text",
+          "rules": [
+            { "kind": "max_length", "value": 100, "message": "Acorta tu nombre a 100 caracteres como máximo." },
+            { "kind": "pattern", "value": "[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .-]{2,100}",
+              "message": "Usa solo letras y espacios; por ejemplo: Ana Torres." }
+          ] },
+        { "name": "document_number", "type": "text", "label": "Número de documento de prueba",
+          "hint": "Formato de prueba: TEST- seguido de letras o números, por ejemplo TEST-12345.",
+          "required": true, "required_message": "Escribe el número de documento de prueba.",
+          "input_mode": "text",
+          "rules": [
+            { "kind": "max_length", "value": 25, "message": "Acorta el documento a 25 caracteres como máximo." },
+            { "kind": "pattern", "value": "TEST-[A-Za-z0-9]{1,20}",
+              "message": "Escribe el documento de prueba con el formato TEST-12345." }
+          ] }
+      ]
+    },
+    {
+      "id": "contacto", "order": 2,
+      "title": "Contacto (ejemplo no aprobado)",
+      "fields": [
+        { "name": "phone", "type": "text", "label": "Celular", "hint": "9 dígitos, sin espacios.",
+          "required": true, "required_message": "Escribe tu número de celular.",
+          "autocomplete": "tel-national", "input_mode": "tel",
+          "rules": [
+            { "kind": "max_length", "value": 9, "message": "El celular tiene 9 dígitos; elimina los sobrantes." },
+            { "kind": "pattern", "value": "9[0-9]{8}", "message": "Escribe 9 dígitos que empiecen con 9; por ejemplo: 912345678." }
+          ] }
+      ]
+    },
+    {
+      "id": "aceptacion", "order": 3,
+      "title": "Confirmación (ejemplo no aprobado)",
+      "fields": [
+        { "name": "accept_terms", "type": "checkbox", "label": "Acepto los términos de ejemplo",
+          "required": true, "required_message": "Marca la casilla para aceptar los términos y continuar." }
+      ]
+    }
+  ]
+}
