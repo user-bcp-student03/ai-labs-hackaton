@@ -1,0 +1,14 @@
+<section #container class="summary" tabindex="-1" aria-labelledby="error-summary-heading">
+  <h3 id="error-summary-heading" class="summary__heading">{{ heading() }}</h3>
+  <ul class="summary__list">
+    @for (item of items(); track $index) {
+      <li>
+        @if (item.fieldName; as fieldName) {
+          <a [href]="'#' + inputId(fieldName)" (click)="select($event, fieldName)">{{ item.message }}</a>
+        } @else {
+          {{ item.message }}
+        }
+      </li>
+    }
+  </ul>
+</section>

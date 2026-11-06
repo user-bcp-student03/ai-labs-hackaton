@@ -1,0 +1,23 @@
+.skip-link {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  transform: translateY(-100%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.shell {
+  max-inline-size: 36rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.shell:focus {
+  outline: none;
+}

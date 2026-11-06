@@ -18,36 +18,36 @@ _Cubre: supuestos y preguntas abiertas de la HU y decisiones transversales (OQ-0
 
 _Cubre: criterio 1 de la HU._
 
-- [ ] 2.1 Implementar el motor de pasos configurable a partir del contrato de la tarea 1.7 (lista, orden, datos requeridos y reglas de validación); verificar con una prueba, usando pasos «ejemplo no aprobado», que cambiar la configuración cambia los pasos sin modificar el comportamiento del flujo
-- [ ] 2.2 Mostrar la secuencia de pasos, el paso actual y el progreso en todo momento; verificar con pruebas de los escenarios de inicio, avance y permanencia tras error, usando pasos «ejemplo no aprobado»
+- [x] 2.1 Implementar el motor de pasos configurable a partir del contrato de la tarea 1.7 (lista, orden, datos requeridos y reglas de validación); verificar con una prueba, usando pasos «ejemplo no aprobado», que cambiar la configuración cambia los pasos sin modificar el comportamiento del flujo
+- [x] 2.2 Mostrar la secuencia de pasos, el paso actual y el progreso en todo momento; verificar con pruebas de los escenarios de inicio, avance y permanencia tras error, usando pasos «ejemplo no aprobado»
 
 ## 3. Validación bloqueante
 
 _Cubre: criterio 2 de la HU._
 
-- [ ] 3.1 Implementar la validación por paso, tomada de la configuración, que bloquea el avance ante datos faltantes o inválidos; verificar con pruebas de los escenarios de dato faltante, dato inválido, corrección y cambio de regla configurada, usando pasos «ejemplo no aprobado»
-- [ ] 3.2 Externalizar en la configuración los mensajes accionables asociados al dato concreto; verificar que cada regla de validación de la configuración de ejemplo tiene un mensaje que indica cómo corregir
+- [x] 3.1 Implementar la validación por paso, tomada de la configuración, que bloquea el avance ante datos faltantes o inválidos; verificar con pruebas de los escenarios de dato faltante, dato inválido, corrección y cambio de regla configurada, usando pasos «ejemplo no aprobado»
+- [x] 3.2 Externalizar en la configuración los mensajes accionables asociados al dato concreto; verificar que cada regla de validación de la configuración de ejemplo tiene un mensaje que indica cómo corregir
 
 ## 4. Activación del estado de la wallet
 
 _Cubre: criterio 3 de la HU._
 
-- [ ] 4.1 Implementar el estado de la wallet y la transición a `activo` solo en el cierre exitoso del flujo, idempotente ante cierres repetidos; verificar con pruebas de cierre correcto, onboarding incompleto y cierre repetido
-- [ ] 4.2 Habilitar el acceso al punto de entrada de pagos de bajo monto solo con wallet `activo`; verificar con pruebas de acceso permitido y denegado
+- [x] 4.1 Implementar el estado de la wallet y la transición a `activo` solo en el cierre exitoso del flujo, idempotente ante cierres repetidos; verificar con pruebas de cierre correcto, onboarding incompleto y cierre repetido
+- [x] 4.2 Habilitar el acceso al punto de entrada de pagos de bajo monto solo con wallet `activo`; verificar con pruebas de acceso permitido y denegado
 
 ## 5. Eventos de analítica
 
 _Cubre: criterios 4 y 5 de la HU; la tarea 5.2 es agregada por análisis._
 
-- [ ] 5.1 Registrar los eventos de inicio, de finalización de cada paso y de cierre con marca de tiempo, identificador de onboarding y atributo de cohorte MVP Perú; verificar con pruebas de cada escenario de registro
-- [ ] 5.2 Deduplicar eventos por onboarding, tipo y paso ante reintentos del cliente; verificar con una prueba de envío repetido que conserva un único evento (agregado por análisis)
+- [x] 5.1 Registrar los eventos de inicio, de finalización de cada paso y de cierre con marca de tiempo, identificador de onboarding y atributo de cohorte MVP Perú; verificar con pruebas de cada escenario de registro
+- [x] 5.2 Deduplicar eventos por onboarding, tipo y paso ante reintentos del cliente; verificar con una prueba de envío repetido que conserva un único evento (agregado por análisis)
 - [ ] 5.3 Dejar los datos listos para calcular duración por usuario y mediana de la cohorte sin fijar la frontera, y generar el reporte mensual de mediana con la comparación 8 → 3 minutos como parámetros; verificar con una consulta de ejemplo que calcula la mediana con una frontera de prueba (escenarios «Cálculo de la mediana de la cohorte» y «Reporte periódico de duración»), una vez definida la tarea 1.2
 
 ## 6. Salida analítica de MAU y CAC
 
 _Cubre: criterio 6 de la HU._
 
-- [ ] 6.1 Producir la salida mensual de conteo de nuevos usuarios activos de la cohorte MVP Perú; verificar con datos de prueba de meses 1-3, excluyendo onboardings no finalizados
+- [x] 6.1 Producir la salida mensual de conteo de nuevos usuarios activos de la cohorte MVP Perú; verificar con datos de prueba de meses 1-3, excluyendo onboardings no finalizados
 - [ ] 6.2 Incorporar la atribución de gasto de adquisición, en PEN, según la fuente confirmada en la tarea 1.4, indicando "no disponible" cuando falte el dato; verificar con datos de prueba que permite calcular el CAC por usuario nuevo y los parámetros de referencia 1,000–2,000 y PEN 10 (escenarios «Atribución de gasto de adquisición», «Campos de la salida mensual» y «Mes sin gasto de adquisición disponible»)
 - [ ] 6.3 Documentar la salida analítica (campos y significado, incluyendo el glosario de "activación" de la tarea 1.3); verificar que la documentación coincide con los campos entregados
 
