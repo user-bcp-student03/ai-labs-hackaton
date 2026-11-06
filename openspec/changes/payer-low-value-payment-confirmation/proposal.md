@@ -69,14 +69,17 @@ Decididas (2026-11-06):
 
 Abiertas (no se responden en este cambio):
 
-- OQ-04: momento de asignación de la referencia de transacción (se asume desde la creación del intento; ver `design.md`).
-- OQ-05: definición del evento de activación del pagador y su relación con MAU.
-- OQ-06: criterio de pertenencia a la cohorte MVP Perú.
 - OQ-10: tratamiento de la confirmación tardía de un intento ya expirado.
-- OQ-15: regla inicial de monto bajo por proveedor/canal (pregunta abierta de la HU).
-- OQ-16: etiquetas de los estados terminales.
-- OQ-17: tiempo máximo de un intento antes de expirar.
-- OQ-18: definición de "caída en checkout" y de "abandono".
+
+Decididas el 2026-11-06 (registro: OPEN-QUESTIONS.md, sección 0):
+
+- OQ-04: la referencia de transacción se asigna al crear el intento.
+- OQ-05: MAU = pagadores distintos con al menos un evento de activación del pagador en el mes.
+- OQ-06: la cohorte MVP Perú se asigna al inicio del onboarding.
+- OQ-15: el tope de monto es el límite del proveedor/canal, cargado como configuración.
+- OQ-16: etiquetas «Exitoso», «Fallido» y «Expirado».
+- OQ-17: tiempo máximo del intento de 120 segundos.
+- OQ-18: tasa de caída = intentos iniciados que no llegan a `exitoso` ÷ intentos iniciados; la definición de «abandono» sigue pendiente.
 
 ## Dependencias entre cambios
 

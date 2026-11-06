@@ -6,19 +6,19 @@ from datetime import datetime
 
 from app.config import Settings
 from app.errors import PaymentNotFound, RetryNotAllowed
-from app.ports.idempotency_store import STATUS_EXPIRED, STATUS_FAILED, IdempotencyStorePort
 from app.ports.payment_provider import PaymentProviderPort
+from app.ports.payment_store import PaymentStorePort
+from app.services.attempt_state import RETRYABLE_STATUSES
 from app.services.payment_service import PaymentOutcome, PaymentService
 
-RETRYABLE_STATUSES = (STATUS_FAILED, STATUS_EXPIRED)
 RETRY_INTENT_PREFIX = "retry-of:"
 
 
 class RetryService:
-    def __init__(self, store: IdempotencyStorePort, provider: PaymentProviderPort, settings: Settings,
-                 clock: Callable[[], datetime]) -> None:
+    def __init__(self, store: PaymentStorePort, provider: PaymentProviderPort, settings: Settings,
+                 clock: Callable[[], datetime], payments: PaymentService | None = None) -> None:
         self._store = store
-        self._payments = PaymentService(store=store, provider=provider, settings=settings, clock=clock)
+        self._payments = payments or PaymentService(store=store, provider=provider, settings=settings, clock=clock)
 
     def create_linked_retry(self, payment_id: str, payer_id: str, request_id: str,
                             correlation_id: str) -> PaymentOutcome:

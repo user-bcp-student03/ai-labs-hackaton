@@ -31,6 +31,8 @@ class FakeProvider:
         self.resolve_calls = []
         self.programmed = []
         self.on_submit = None
+        self.resolve_status = "PENDING"
+        self.resolve_fails = False
         self._lock = threading.Lock()
 
     def program(self, status, with_id=True):
@@ -49,8 +51,12 @@ class FakeProvider:
         return self._result_type(provider_payment_id=f"fake-pay-{n}" if with_id else None, status=status)
 
     def resolve(self, provider_payment_id):
+        from app.errors import ProviderError
+
         self.resolve_calls.append(provider_payment_id)
-        return self._result_type(provider_payment_id=provider_payment_id, status="SUCCEEDED")
+        if self.resolve_fails:
+            raise ProviderError
+        return self._result_type(provider_payment_id=provider_payment_id, status=self.resolve_status)
 
 
 @pytest.fixture
@@ -90,17 +96,11 @@ def make_world(store, provider, clock, make_settings):
     """Cablea servicios reales sobre SQLite real y el doble del proveedor."""
 
     def _make(**settings_overrides):
-        from app.services.payment_service import PaymentService
-        from app.services.request_audit_service import RequestAuditService
-        from app.services.retry_service import RetryService
+        from app.services.container import build_services
 
         settings = make_settings(**settings_overrides)
-        return SimpleNamespace(
-            settings=settings, store=store, provider=provider, clock=clock,
-            payments=PaymentService(store=store, provider=provider, settings=settings, clock=clock),
-            retries=RetryService(store=store, provider=provider, settings=settings, clock=clock),
-            audit=RequestAuditService(store=store),
-        )
+        services = build_services(store, provider, settings, clock)
+        return SimpleNamespace(settings=settings, provider=provider, clock=clock, **vars(services))
 
     return _make
 

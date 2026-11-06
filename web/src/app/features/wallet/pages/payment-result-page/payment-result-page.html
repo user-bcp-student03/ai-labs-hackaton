@@ -1,0 +1,32 @@
+<h1 #heading tabindex="-1">{{ payment()?.status_label ?? copy.resultHeading }}</h1>
+
+@if (payment(); as result) {
+  <p class="status status--{{ result.status.toLowerCase() }}">{{ statusMessage() }}</p>
+  @if (pending()) {
+    <p class="progress"><span class="spinner" aria-hidden="true"></span> {{ copy.resultLoading }}</p>
+  }
+  @if (result.transaction_reference; as reference) {
+    <dl class="reference">
+      <dt>{{ copy.referenceLabel }}</dt>
+      <dd>{{ reference }}</dd>
+    </dl>
+  }
+  @if (retryError(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+  <app-payment-actions [actions]="result.actions" [busy]="retrying()" (retry)="retry()" />
+  @if (!pending()) {
+    <nav class="next-steps" aria-label="Otras opciones">
+      <a class="button" [routerLink]="routes.payments">{{ copy.newPayment }}</a>
+      <a class="button secondary" [routerLink]="routes.paymentHistory">{{ copy.history }}</a>
+    </nav>
+  }
+} @else if (loadError(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+  <div class="actions">
+    <button type="button" (click)="reload()">{{ copy.resultRetryLoad }}</button>
+  </div>
+  <app-payment-actions [actions]="backActions" />
+} @else {
+  <p class="progress">{{ copy.resultLoading }}</p>
+}
